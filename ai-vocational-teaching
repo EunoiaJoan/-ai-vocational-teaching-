@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI职教视频个性化教学</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/antd@5/dist/reset.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dplayer@1.27.1/dist/DPlayer.min.css"/>
+  <style>
+    body{margin:0;padding:24px;background:#fafafa}
+    #video-box{width:100%;max-width:800px;margin:0 auto 24px}
+    #radar-box{width:100%;max-width:400px;margin:0 auto}
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- 1. React -->
+  <script crossorigin src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.min.js"></script>
+  <!-- 2. 组件库 & 工具 -->
+  <script src="https://cdn.jsdelivr.net/npm/antd@5/dist/antd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dplayer@1.27.1/dist/DPlayer.min.js"></script>
+
+  <!-- 3. 业务代码 -->
+  <script type="text/babel">
+    const { useEffect, useRef, useState } = React;
+    const { Switch, Typography } = antd;
+    const { Title } = Typography;
+
+    /*----- 暗黑模式 -----*/
+    function ThemeToggle() {
+      const [dark, setDark] = React.useState(false);
+      useEffect(() => {
+        document.body.style.background = dark ? '#141414' : '#fafafa';
+      }, [dark]);
+      return <Switch checked={dark} onChange={setDark} checkedChildren="🌙" unCheckedChildren="☀️" />;
+    }
+
+    /*----- 视频播放器 -----*/
+    function AiVideo({ url }) {
+      const ref = useRef(null);
+      useEffect(() => {
+        const dp = new DPlayer({
+          container: ref.current,
+          video: { url },
+          autoplay: false,
+          theme: '#00b96b'
+        });
+        return () => dp.destroy();
+      }, [url]);
+      return <div ref={ref} id="video-box" />;
+    }
+
+    /*----- 雷达图 -----*/
+    function AbilityRadar({ data }) {
+      const ref = useRef(null);
+      useEffect(() => {
+        const chart = echarts.init(ref.current);
+        chart.setOption({
+          radar: {
+            indicator: ['安全规范','工具使用','故障排查','工艺优化','创新设计'].map(name=>({name}))
+          },
+          series: [{ type: 'radar', data: [{ value: data, areaStyle: {} }] }]
+        });
+        return () => chart.dispose();
+      }, [data]);
+      return <div ref={ref} id="radar-box" style={{height: 300 }} />;
+    }
+
+    /*----- 主页面 -----*/
+    function App() {
+      return (
+        <>
+          <div style={{ textAlign: 'right', padding: 16 }}>
+            <ThemeToggle />
+          </div>
+          <Title level={2} style={{ textAlign: 'center' }}>
+            AI 职教视频个性化教学
+          </Title>
+          <AiVideo url="https://cdn.jsdelivr.net/npm/big-buck-bunny-30s@1.0/video.mp4" />
+          <AbilityRadar data={[88, 72, 90, 65, 50]} />
+        </>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
