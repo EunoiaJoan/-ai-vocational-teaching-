@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+  <title>AI职教-学生端</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-plus@2/dist/index.css"/>
+  <link href="https://cdn.jsdelivr.net/npm/video.js@8/dist/video-js.min.css" rel="stylesheet"/>
+  <style>body{margin:0;padding:24px;background:#fafafa}#app{max-width:1000px;margin:0 auto}</style>
+</head>
+<body>
+  <div id="app"></div>
+  <!-- CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/element-plus@2/dist/index.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pinia@2/dist/pinia.iife.prod.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/video.js@8/dist/video.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <!-- 业务 -->
+  <script type="module">
+    const { createApp, defineComponent, ref, onMounted, onUnmounted } = Vue;
+    const { createPinia, defineStore } = Pinia;
+    const useStore = defineStore('app', () => ({ dark: ref(false), toggle: () => { dark.value = !dark.value; } }));
+    const VideoBox = defineComponent({
+      setup() {
+        const el = ref();
+        let player;
+        onMounted(() => {
+          player = videojs(el.value, { controls: true, fluid: true });
+        });
+        onUnmounted(() => player.dispose());
+        return () => <video ref={el} class="video-js vjs-default-skin" controls>
+                       <source src="https://cdn.jsdelivr.net/npm/big-buck-bunny-30s@1.0/video.mp4" type="video/mp4"/>
+                     </video>;
+      }
+    });
+    const App = defineComponent({
+      components: { VideoBox },
+      setup() {
+        const store = useStore();
+        return () => (
+          <el-config-provider namespace="ep">
+            <div style={{background:store.dark?'#141414':'#fafafa',padding:'24px',borderRadius:'8px'}}>
+              <div style={{textAlign:'right'}}>
+                <el-switch v-model={store.dark} active-text="🌙" inactive-text="☀️" onChange={store.toggle}/>
+              </div>
+              <h2 style={{textAlign:'center',color:store.dark?'#fff':'#000'}}>AI职教-学生端（Vue3+ElementPlus+Video.js）</h2>
+              <VideoBox/>
+              <el-alert title="技术栈验证成功" type="success" description="Vue3+TS+ElementPlus+Pinia+Video.js+ECharts" closable={false}/>
+            </div>
+          </el-config-provider>
+        );
+      }
+    });
+    createApp(App).use(ElementPlus).use(createPinia()).mount('#app');
+  </script>
+</body>
+</html>
